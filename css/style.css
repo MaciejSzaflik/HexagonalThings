@@ -1,0 +1,55 @@
+/* fonts */
+@font-face {
+font-family: Hamburger;
+src: url(../font/Hamburger.ttf);
+}
+/* base styles */
+html {
+font-family: "Arial", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 10px;
+line-height: 1.2;
+color: #fed;
+text-shadow: black 1px 1px;
+text-align: center;
+background: #255;
+background: linear-gradient(45deg, #255, #101);
+}
+body {
+margin: 0;
+}
+h1 {
+font-size: 70px;
+}
+p {
+margin: 0 0 10px 0;
+}
+#container {
+padding-left: 300px;
+padding-right: 300px;
+padding-bottom: 200px;
+}
+/* threejs container styles */
+#example-container {
+background:#111;
+margin: 10px auto;
+padding: 10px;
+min-height: 300px;
+}
+#threejs-container {
+position: relative;
+background:#000;
+color: #101;
+text-align: center;
+padding: 50% 0 0 0;
+height: 0;
+}
+#threejs-container canvas {
+position: absolute;
+left: 0px;
+top: 0px;
+right: 0px;
+bottom: 0px;
+}
+.hidden {
+ display: none;
+}
