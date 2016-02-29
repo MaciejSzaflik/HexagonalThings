@@ -15,10 +15,21 @@ function ( THREE, camera, renderer, scene,creator) {
 	text : [],
 	sceneObjects : [],
 	clock : 0,
+	
+	
+	lastX : 0,
+	lastY : 0,
+	divX : 0,
+	divY : 0,
+	angleX : 0,
+	angleY : -Math.PI*0.1,
+	currentForward : new THREE.Vector3(1,0,0),
+	currentUp : new THREE.Vector3(0,0,1),
 			
 	FizzyText :function()
 	{
-	    this.message = 'dat.gui';	  		  
+	    this.message = 'dat.gui';	
+		
 	},
 			
 	randomIntFromInterval : function(min,max)
@@ -49,9 +60,11 @@ function ( THREE, camera, renderer, scene,creator) {
         projector = new THREE.Projector();
 	    renderer.setClearColor( 0xff0000, 1 );
 	    
+		//document.addEventListener("mousemove", this.moveCallback, false);
+		
 		var size = 4;
-		creator.createHexMap(new THREE.Vector3(-50,-24),size,8,12,0,scene);
-	 
+		//creator.createHexMap(new THREE.Vector3(0,-24),size,8,12,0,scene);
+		creator.createIcoheadreon(new THREE.Vector3(0,0,0),scene);
 	   window.requestAnimationFrame( app.animate );
     },
 		
@@ -88,10 +101,111 @@ function ( THREE, camera, renderer, scene,creator) {
         return point;
     },
 	
-	
-    
-    			
+	moveCallback : function(e)
+	{
+		if(app)
+		{
 
+		var movementX = e.movementX ||
+			  e.mozMovementX        ||
+			  e.webkitMovementX     ||
+			  0,
+			movementY = e.movementY ||
+			  e.mozMovementY        ||
+			  e.webkitMovementY     ||
+			  0;
+		
+		
+		app.calculateCameraRotation(movementX,movementY);
+		}	
+	},	
+			
+	calculateCameraRotation : function(movementX,movementY)
+	{
+		var x = movementX/app.renderer.domElement.width;
+		var y = movementY/app.renderer.domElement.height;	
+				
+		app.angleX -= Math.atan(x)*1.0;
+		app.angleY -= Math.atan(y)*1.0;
+				
+		var frontDirection = new THREE.Vector3(0,0,0)
+		frontDirection.copy(app.cameraLookDir(camera));
+		frontDirection.sub(camera.position);
+		frontDirection.normalize();
+		
+		var quatX = new THREE.Quaternion();
+		var quatY = new THREE.Quaternion();
+		quatX.setFromAxisAngle( new THREE.Vector3(0,1,0), app.angleX);
+		quatY.setFromAxisAngle( new THREE.Vector3(1,0,0), app.angleY);
+		camera.quaternion.multiplyQuaternions(quatX,quatY);
+		
+	},	
+	cameraLookDir: function(camera) {
+        var vector = new THREE.Vector3(0, 0, -1);
+        vector.applyEuler(camera.rotation, camera.rotation.order);
+        return vector;
+    },
+	getStrafeDirection: function() {
+		var strafeDirection = new THREE.Vector3();
+		strafeDirection.crossVectors(forwardDirection,camera.up);
+		return strafeDirection
+	},
+	keyboardInfo:function ()
+	{		
+		var forwardDirection = this.cameraLookDir(camera);
+		var strafeDirection = new THREE.Vector3();
+		strafeDirection.crossVectors(forwardDirection,camera.up);
+	
+		var forwardScale = 0.0;
+		forwardScale += this.keyboardInteraction.pressed("w") ? 1.0 : 0.0;
+		forwardScale -= this.keyboardInteraction.pressed("s") ? 1.0 : 0.0;
+		
+		var strafeScale = 0.0;
+		strafeScale += this.keyboardInteraction.pressed("d") ? 1.0 : 0.0;
+		strafeScale -= this.keyboardInteraction.pressed("a") ? 1.0 : 0.0;
+			 
+		forwardDirection.multiplyScalar(forwardScale);
+		strafeDirection.multiplyScalar(strafeScale);
+		
+		camera.position.add(forwardDirection);
+		camera.position.add(strafeDirection);
+
+		if(this.keyboardInteraction.pressed("e"))
+			app.calculateCameraRotation(10,0);
+		if(this.keyboardInteraction.pressed("q"))
+			app.calculateCameraRotation(-10,0);
+		if(this.keyboardInteraction.pressed("z"))
+			app.calculateCameraRotation(0,10);
+		if(this.keyboardInteraction.pressed("c"))
+			app.calculateCameraRotation(0,-10);
+		
+	},	
+	tryToInitPointLock :function()
+	{
+		var havePointerLock = 'pointerLockElement' in document ||
+		'mozPointerLockElement' in document ||
+		'webkitPointerLockElement' in document;
+		
+		if(havePointerLock)
+		{
+			var element = document.getElementById( 'threejs-container' );
+			
+			element.requestPointerLock = element.requestPointerLock ||
+					 element.mozRequestPointerLock ||
+					 element.webkitRequestPointerLock;
+					 
+			element.requestPointerLock();
+
+			if(document.pointerLockElement === element ||
+			  document.mozPointerLockElement === element ||
+			  document.webkitPointerLockElement === element) {
+				console.log('The pointer lock status is now locked');
+			} else {
+				console.log('The pointer lock status is now unlocked');  
+			}
+			
+		}
+	}
 	
   };
   return app;

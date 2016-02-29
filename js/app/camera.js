@@ -2,9 +2,9 @@ define( ["three", "container"], function ( THREE, container ) {
   
   
   console.log(container.width + " " + container.height);
-  var sizeX = 90;
+  var sizeX = 40;
   var sizeY = 50;
-  var camera = new THREE.OrthographicCamera( -sizeX, sizeX,sizeY,-sizeY, 0.1, 100000 );
+  var camera = new THREE.PerspectiveCamera( sizeX, sizeX/sizeY, 0.01, 10000 );
   camera.position.z = 70;
   camera.position.y = 0;
 
