@@ -101,9 +101,9 @@ Creator = function ()
 		}
 	}
 	
-	this.createIcoheadreon = function(position,sceneToAdd)
+	this.createIcoheadreon = function(position,sceneToAdd,scale)
 	{
-		var t = (1.0 + Math.sqrt(5.0)) / 2.0;
+		var t = (1.0 + Math.sqrt(5))/ 2.0;
 		var geom = new THREE.Geometry();
 		
 		geom.vertices.push(new THREE.Vector3(-1, t, 0));
@@ -149,6 +149,7 @@ Creator = function ()
 		
 		var object = new THREE.Mesh( geom, new THREE.MeshNormalMaterial() );
 		object.position = position;
+		object.scale = object.scale.multiplyScalar(scale);
 		sceneToAdd.add(object);
 		return object;
 	}

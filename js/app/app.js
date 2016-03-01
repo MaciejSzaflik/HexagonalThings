@@ -1,6 +1,6 @@
 define( ["three", "camera", "renderer", 
-"scene","dat","KeyboardState","creator"],
-function ( THREE, camera, renderer, scene,creator) {
+"scene","dat","KeyboardState","creator","rotator","rotateAround"],
+function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
   var app = {
   
     GuiVarHolder : null,
@@ -14,8 +14,11 @@ function ( THREE, camera, renderer, scene,creator) {
     keyboardInteraction : null,
 	text : [],
 	sceneObjects : [],
+	transformations : [],
 	clock : 0,
-	
+	clockFrame : null,
+	time : null,
+	delta : null,
 	
 	lastX : 0,
 	lastY : 0,
@@ -52,6 +55,7 @@ function ( THREE, camera, renderer, scene,creator) {
 
     init: function () 
     {
+		clockFrame = new THREE.Clock();
 		creator = new Creator();
         this.initializeGUI();
 	    this.keyboardInteraction = new THREEx.KeyboardState();
@@ -64,10 +68,36 @@ function ( THREE, camera, renderer, scene,creator) {
 		
 		var size = 4;
 		//creator.createHexMap(new THREE.Vector3(0,-24),size,8,12,0,scene);
-		creator.createIcoheadreon(new THREE.Vector3(0,0,0),scene);
-	   window.requestAnimationFrame( app.animate );
+	    
+	    window.requestAnimationFrame( app.animate );
+		
+		var sun = creator.createIcoheadreon(new THREE.Vector3(0,0,0),scene,1.5);
+		var planet = creator.createIcoheadreon(new THREE.Vector3(10,0,0),scene,1);	
+		var moon = creator.createIcoheadreon(new THREE.Vector3(-5,0,0),scene,0.5);
+		
+		this.addRotator(planet,new THREE.Vector3(2,1,3),3);
+		this.addRotator(sun,new THREE.Vector3(0,1,0),1);
+		this.addRotator(moon,new THREE.Vector3(0,1,0),1);
+		
+		this.addRotateAround(sun,planet,15,0.01);
+		this.addRotateAround(planet,moon,6,0.03);
+	
     },
 		
+	addRotator : function(object,axis,speed)
+	{
+		var rotator = new Rotator();
+		rotator.setUp(axis,speed,object);
+		this.transformations.push(rotator);
+		return rotator;
+	},
+	addRotateAround : function(center,orbiting,radius,speed)
+	{
+		var rotateAround = new RotateAround();
+		rotateAround.setUp(radius,center,speed,orbiting);
+		this.transformations.push(rotateAround);
+		return rotateAround;
+	},
 
 	render :function ()
 	{
@@ -83,6 +113,13 @@ function ( THREE, camera, renderer, scene,creator) {
     
     animate: function () 
     {
+		delta = clockFrame.getDelta();
+		
+		for(var i = 0;i<app.transformations.length;i++)
+		{
+			app.transformations[i].update(delta);
+		}
+		
         window.requestAnimationFrame( app.animate );
 		app.render();	
     },	
