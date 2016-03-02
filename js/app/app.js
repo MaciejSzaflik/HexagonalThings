@@ -71,19 +71,56 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	    
 	    window.requestAnimationFrame( app.animate );
 		
-		var sun = creator.createIcoheadreon(new THREE.Vector3(0,0,0),scene,1.5);
-		var planet = creator.createIcoheadreon(new THREE.Vector3(10,0,0),scene,1);	
-		var moon = creator.createIcoheadreon(new THREE.Vector3(-5,0,0),scene,0.5);
+		var sun = creator.createIcoheadreon(new THREE.Vector3(0,0,0),scene,2.5);
+		sun.material = new THREE.MeshBasicMaterial({color: 0xffffff});
 		
-		this.addRotator(planet,new THREE.Vector3(2,1,3),3);
-		this.addRotator(sun,new THREE.Vector3(0,1,0),1);
-		this.addRotator(moon,new THREE.Vector3(0,1,0),1);
+		var light = new THREE.PointLight( 0xffffff, 1, 100 );
+		var ambientLight = new THREE.AmbientLight( 0x1f1f1f ); // soft white light
 		
-		this.addRotateAround(sun,planet,15,0.01);
-		this.addRotateAround(planet,moon,6,0.03);
-	
+		light.position.set( 0, 0, 0 );
+		scene.add( ambientLight );
+		scene.add( light );
+		for(var i = 0;i<20;i++)
+		{
+			var planet = creator.createIcoheadreon(new THREE.Vector3(10,0,0),scene,this.getRR(1.0,1.5));
+			
+			this.addRotator(planet,new THREE.Vector3(2,1,3),3);
+			
+			var axisX = this.getRV(0,1,0,1,0,1).multiplyScalar(i%2==1?1:-1);
+			var axisY = this.getRV(0,1,0,1,0,1).multiplyScalar(i%2==0?1:-1);
+			console.log(axisX.x + " " + axisX.y + " " + axisX.z);
+			this.addRotateAround(sun,planet,this.getRR(40,60) + i,this.getRR(0.005,0.015),axisX,axisY);
+			var numberOfMoons = this.getRR(0,3);
+			for(var j = 0;j<numberOfMoons;j++)
+			{
+				var moon = creator.createIcoheadreon(new THREE.Vector3(-5,0,0),scene,this.getRR(0.2,0.6));
+				
+				this.addRotator(moon,new THREE.Vector3(0,1,0),1);
+				axisX = this.getRV(0,1,0,1,0,1);
+			    axisY = this.getRV(0,1,0,1,0,1);
+				this.addRotateAround(planet,moon,this.getRR(10,15),this.getRR(0.01,0.01),axisX,axisY)
+			}
+		}
+		
+		
+		this.addRotator(sun,new THREE.Vector3(1,0.2,0.2),1);
     },
-		
+	getRR :function(min, max) 
+	{
+		return Math.random() * (max - min) + min;
+	},
+	getRV :function(minX, maxX,minY, maxY,minZ, maxZ) 
+	{
+		return new THREE.Vector3(this.getRR(minX,maxX),this.getRR(minY,maxY),this.getRR(minZ,maxZ));
+	},
+	getRand : function(constV,mulV)
+	{
+		return constV + Math.random()*mulV;
+	},
+	getRadVec : function(constX,mulX,constY,mulY,constZ,mulZ)
+	{
+		return new THREE.Vector3(constX + mulX*Math.random(),constY + mulY*Math.random(),constZ + mulZ*Math.random());
+	},
 	addRotator : function(object,axis,speed)
 	{
 		var rotator = new Rotator();
@@ -91,10 +128,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		this.transformations.push(rotator);
 		return rotator;
 	},
-	addRotateAround : function(center,orbiting,radius,speed)
+	addRotateAround : function(center,orbiting,radius,speed,axisX,axisY)
 	{
 		var rotateAround = new RotateAround();
-		rotateAround.setUp(radius,center,speed,orbiting);
+		rotateAround.setUp(radius,center,speed,orbiting,axisX,axisY);
 		this.transformations.push(rotateAround);
 		return rotateAround;
 	},

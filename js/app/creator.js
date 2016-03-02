@@ -147,7 +147,7 @@ Creator = function ()
 		
 		geom.computeFaceNormals();
 		
-		var object = new THREE.Mesh( geom, new THREE.MeshNormalMaterial() );
+		var object = new THREE.Mesh( geom, new THREE.MeshLambertMaterial() );
 		object.position = position;
 		object.scale = object.scale.multiplyScalar(scale);
 		sceneToAdd.add(object);
