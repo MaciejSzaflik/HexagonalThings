@@ -10,7 +10,6 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	renderer,
 	creator,
 
-	projector : null,
     keyboardInteraction : null,
 	text : [],
 	sceneObjects : [],
@@ -19,6 +18,9 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	clockFrame : null,
 	time : null,
 	delta : null,
+	aniamtion : null,
+	cameraLocked : false,
+	mixer : null,
 	
 	lastX : 0,
 	lastY : 0,
@@ -32,7 +34,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	FizzyText :function()
 	{
 	    this.message = 'dat.gui';	
-		
+		this.tryToLock = function()
+		{		  
+			app.tryToInitPointLock();
+		}
 	},
 			
 	randomIntFromInterval : function(min,max)
@@ -46,10 +51,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 
 	
 	initializeGUI : function()
-	{
-		var guiImg = new dat.GUI();			  
+	{	  
 	    this.GuiVarHolder = new this.FizzyText();
-	        var gui = new dat.GUI();  		
+	    var gui = new dat.GUI(); 
+		gui.add(this.GuiVarHolder, 'tryToLock');			
 	},
 	
 
@@ -61,9 +66,15 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	    this.keyboardInteraction = new THREEx.KeyboardState();
 	 	this.text.push(creator.createText(10,10,10,10));
         this.text[0].innerHTML = "hello"
-        projector = new THREE.Projector();
 	    renderer.setClearColor( 0xff0000, 1 );
 	    
+		
+		document.addEventListener('pointerlockchange', this.changeCallback, false);
+	    document.addEventListener('mozpointerlockchange', this.changeCallback, false);
+	    document.addEventListener('webkitpointerlockchange', this.changeCallback, false);
+
+	    document.addEventListener("mousemove", this.moveCallback, false);
+		
 		//document.addEventListener("mousemove", this.moveCallback, false);
 		
 		var size = 4;
@@ -75,20 +86,22 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		sun.material = new THREE.MeshBasicMaterial({color: 0xffffff});
 		
 		var light = new THREE.PointLight( 0xffffff, 1, 100 );
-		var ambientLight = new THREE.AmbientLight( 0x1f1f1f ); // soft white light
+		var ambientLight = new THREE.AmbientLight( 0x1f1f1f ); 
 		
-		light.position.set( 0, 0, 0 );
+		var light2 = new THREE.PointLight( 0xffffff, 1, 100 );
+		this.addRotateAround(sun,light,40,0.005,new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0));
+		this.addRotateAround(sun,light2,40,0.005,new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1));
 		scene.add( ambientLight );
 		scene.add( light );
+		scene.add( light2 );
 		for(var i = 0;i<20;i++)
 		{
 			var planet = creator.createIcoheadreon(new THREE.Vector3(10,0,0),scene,this.getRR(1.0,1.5));
-			
+			planet.position.set(100,10,10);
 			this.addRotator(planet,new THREE.Vector3(2,1,3),3);
 			
 			var axisX = this.getRV(0,1,0,1,0,1).multiplyScalar(i%2==1?1:-1);
 			var axisY = this.getRV(0,1,0,1,0,1).multiplyScalar(i%2==0?1:-1);
-			console.log(axisX.x + " " + axisX.y + " " + axisX.z);
 			this.addRotateAround(sun,planet,this.getRR(40,60) + i,this.getRR(0.005,0.015),axisX,axisY);
 			var numberOfMoons = this.getRR(0,3);
 			for(var j = 0;j<numberOfMoons;j++)
@@ -104,7 +117,27 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		
 		
 		this.addRotator(sun,new THREE.Vector3(1,0.2,0.2),1);
+		
+		var loader = new THREE.JSONLoader;
+		var animation;
+		var action = {},mixer;
+		loader.load('./untitled.json', function (geometry, materials) {
+		materials[0].skinning = true;
+		var skinnedMesh = new THREE.SkinnedMesh(geometry,materials[0],false);
+		skinnedMesh.position.y = 2.63;
+		skinnedMesh.scale.set(0.3, 0.3, 0.3);
+		scene.add(skinnedMesh);
+		
+		
+		app.mixer = new THREE.AnimationMixer( skinnedMesh );
+		app.mixer.clipAction( skinnedMesh.geometry.animations[ 0 ] ).play();
+		skinnedMesh.parent = sun;
+	
+		
+		});
+		
     },
+	
 	getRR :function(min, max) 
 	{
 		return Math.random() * (max - min) + min;
@@ -151,7 +184,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
     animate: function () 
     {
 		delta = clockFrame.getDelta();
-		
+		if( app.mixer ) app.mixer.update( delta );
 		for(var i = 0;i<app.transformations.length;i++)
 		{
 			app.transformations[i].update(delta);
@@ -177,7 +210,8 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	
 	moveCallback : function(e)
 	{
-		if(app)
+		//console.log(app.cameraLocked);
+		if(app && this.cameraLocked)
 		{
 
 		var movementX = e.movementX ||
@@ -254,6 +288,13 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 			app.calculateCameraRotation(0,-10);
 		
 	},	
+	changeCallback :function()
+	{
+		var canvas = document.getElementById( 'threejs-container' );
+		var pointerDoc =document.mozPointerLockElement;
+		this.cameraLocked = (canvas === pointerDoc);
+		console.log(this.cameraLocked);
+	},
 	tryToInitPointLock :function()
 	{
 		var havePointerLock = 'pointerLockElement' in document ||
@@ -273,8 +314,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 			if(document.pointerLockElement === element ||
 			  document.mozPointerLockElement === element ||
 			  document.webkitPointerLockElement === element) {
+				this.cameraLocked = true;
 				console.log('The pointer lock status is now locked');
 			} else {
+				this.cameraLocked = true;
 				console.log('The pointer lock status is now unlocked');  
 			}
 			

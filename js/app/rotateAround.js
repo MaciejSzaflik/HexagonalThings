@@ -32,7 +32,7 @@ RotateAround = function ()
 		var y = this.vec1.y*cosVal + this.vec2.y*sinVal + this.center.position.y;
 		var z = this.vec1.z*cosVal + this.vec2.z*sinVal + this.center.position.z;
 		
-		
-		this.object.position = new THREE.Vector3(x,y,z); 
+		//console.log(x + " " +y + " " + z);
+		this.object.position.set(x,y,z); 
 	}
 });
