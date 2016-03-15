@@ -82,15 +82,14 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	    
 	    window.requestAnimationFrame( app.animate );
 		
-		var sun = creator.createIcoheadreon(new THREE.Vector3(0,0,0),scene,2.5);
-		sun.material = new THREE.MeshBasicMaterial({color: 0xffffff});
-		
-		var light = new THREE.PointLight( 0xffffff, 1, 100 );
+		var sun = creator.createIco(new THREE.Vector3(0,-35.5,0),40.5,3,scene);
+		sun.material.shading = THREE.FlatShading;
+		var light = new THREE.PointLight( 0xffffff, 1, 200 );
 		var ambientLight = new THREE.AmbientLight( 0x1f1f1f ); 
 		
-		var light2 = new THREE.PointLight( 0xffffff, 1, 100 );
-		this.addRotateAround(sun,light,40,0.005,new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0));
-		this.addRotateAround(sun,light2,40,0.005,new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1));
+		var light2 = new THREE.PointLight( 0xffffff, 1, 200 );
+		this.addRotateAround(sun,light,100,0.005,new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0));
+		this.addRotateAround(sun,light2,100,0.005,new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1));
 		scene.add( ambientLight );
 		scene.add( light );
 		scene.add( light2 );
@@ -102,7 +101,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 			
 			var axisX = this.getRV(0,1,0,1,0,1).multiplyScalar(i%2==1?1:-1);
 			var axisY = this.getRV(0,1,0,1,0,1).multiplyScalar(i%2==0?1:-1);
-			this.addRotateAround(sun,planet,this.getRR(40,60) + i,this.getRR(0.005,0.015),axisX,axisY);
+			this.addRotateAround(sun,planet,this.getRR(100,120) + i,this.getRR(0.001,0.01),axisX,axisY);
 			var numberOfMoons = this.getRR(0,3);
 			for(var j = 0;j<numberOfMoons;j++)
 			{
@@ -116,22 +115,23 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		}
 		
 		
-		this.addRotator(sun,new THREE.Vector3(1,0.2,0.2),1);
+		this.addRotator(sun,new THREE.Vector3(-1,0,0),0.1);
 		
 		var loader = new THREE.JSONLoader;
 		var animation;
 		var action = {},mixer;
-		loader.load('./untitled.json', function (geometry, materials) {
+		loader.load('./trying_mirror.json', function (geometry, materials) {
 		materials[0].skinning = true;
+		materials[0].shading = THREE.FlatShading;
 		var skinnedMesh = new THREE.SkinnedMesh(geometry,materials[0],false);
-		skinnedMesh.position.y = 2.63;
-		skinnedMesh.scale.set(0.3, 0.3, 0.3);
+		skinnedMesh.position.y = 9.63;
+		skinnedMesh.scale.set(1.3, 1.3, 1.3);
 		scene.add(skinnedMesh);
 		
 		
-		app.mixer = new THREE.AnimationMixer( skinnedMesh );
-		app.mixer.clipAction( skinnedMesh.geometry.animations[ 0 ] ).play();
-		skinnedMesh.parent = sun;
+		//app.mixer = new THREE.AnimationMixer( skinnedMesh );
+		//app.mixer.clipAction( skinnedMesh.geometry.animations[ 0 ] ).play();
+		//skinnedMesh.parent = sun;
 	
 		
 		});

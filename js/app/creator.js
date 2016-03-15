@@ -101,6 +101,14 @@ Creator = function ()
 		}
 	}
 	
+	this.createIco = function(position,radius,detail,sceneToAdd)
+	{
+		var object = new THREE.Mesh(new THREE.IcosahedronGeometry(radius,detail), new THREE.MeshPhongMaterial() );
+		object.position.set(position.x,position.y,position.z);
+		sceneToAdd.add(object);
+		return object;
+	}
+	
 	this.createIcoheadreon = function(position,sceneToAdd,scale)
 	{
 		var t = (1.0 + Math.sqrt(5))/ 2.0;
