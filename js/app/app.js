@@ -122,6 +122,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		var action = {},mixer;
 		loader.load('./trying_mirror.json', function (geometry, materials) {
 		materials[0].skinning = true;
+		materials[0].side = THREE.DoubleSide
 		materials[0].shading = THREE.FlatShading;
 		var skinnedMesh = new THREE.SkinnedMesh(geometry,materials[0],false);
 		skinnedMesh.position.y = 9.63;
@@ -129,8 +130,8 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		scene.add(skinnedMesh);
 		
 		
-		//app.mixer = new THREE.AnimationMixer( skinnedMesh );
-		//app.mixer.clipAction( skinnedMesh.geometry.animations[ 0 ] ).play();
+		app.mixer = new THREE.AnimationMixer( skinnedMesh );
+		app.mixer.clipAction( skinnedMesh.geometry.animations[ 0 ] ).play();
 		//skinnedMesh.parent = sun;
 	
 		
