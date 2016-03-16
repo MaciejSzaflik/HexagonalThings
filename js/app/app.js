@@ -30,6 +30,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	angleY : -Math.PI*0.1,
 	currentForward : new THREE.Vector3(1,0,0),
 	currentUp : new THREE.Vector3(0,0,1),
+	mainCharacter : null,
 			
 	FizzyText :function()
 	{
@@ -38,6 +39,16 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		{		  
 			app.tryToInitPointLock();
 		}
+		this.walk = function()
+		{		  
+			app.mixer._actions[0].weight = 1;
+			app.mixer._actions[1].weight = 0;
+		}
+		this.wave = function()
+		{		  
+			app.mixer._actions[0].weight = 0;
+			app.mixer._actions[1].weight = 1;
+		}	
 	},
 			
 	randomIntFromInterval : function(min,max)
@@ -54,7 +65,9 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	{	  
 	    this.GuiVarHolder = new this.FizzyText();
 	    var gui = new dat.GUI(); 
-		gui.add(this.GuiVarHolder, 'tryToLock');			
+		gui.add(this.GuiVarHolder, 'tryToLock');	
+		gui.add(this.GuiVarHolder, 'walk');
+		gui.add(this.GuiVarHolder, 'wave');
 	},
 	
 
@@ -124,17 +137,20 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		materials[0].skinning = true;
 		materials[0].side = THREE.DoubleSide
 		materials[0].shading = THREE.FlatShading;
-		var skinnedMesh = new THREE.SkinnedMesh(geometry,materials[0],false);
-		skinnedMesh.position.y = 9.63;
-		skinnedMesh.scale.set(1.3, 1.3, 1.3);
-		scene.add(skinnedMesh);
+	    app.mainCharacter = new THREE.SkinnedMesh(geometry,materials[0],false);
+		app.mainCharacter.position.y = 9.59;
+		app.mainCharacter.scale.set(1.3, 1.3, 1.3);
+		scene.add(app.mainCharacter);
 		
+		app.mixer = new THREE.AnimationMixer( app.mainCharacter );
 		
-		app.mixer = new THREE.AnimationMixer( skinnedMesh );
-		app.mixer.clipAction( skinnedMesh.geometry.animations[ 0 ] ).play();
-		//skinnedMesh.parent = sun;
-	
-		
+		app.mixer.clipAction( app.mainCharacter.geometry.animations[ 1 ],0 ).play();
+		app.mixer.clipAction( app.mainCharacter.geometry.animations[ 3 ],0 ).play();
+		//action.walk  = new THREE.AnimationAction( app.mainCharacter.geometry.animations[ 1 ] );
+		//action.wave  = new THREE.AnimationAction( app.mainCharacter.geometry.animations[ 3 ] );
+		app.mixer._actions[0].weight = 1;
+		app.mixer._actions[1].weight = 0;
+		console.log(app.mixer);
 		});
 		
     },
