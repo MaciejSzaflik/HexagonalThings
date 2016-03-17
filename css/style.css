@@ -11,9 +11,31 @@ line-height: 1.2;
 color: #fed;
 text-shadow: black 1px 1px;
 text-align: center;
-background: #255;
-background: linear-gradient(45deg, #255, #101);
+background: linear-gradient(223deg, #1d0e4d, #3e0b49, #104349);
+background-size: 600% 600%;
+
+-webkit-animation: AnimationName 3s ease infinite;
+-moz-animation: AnimationName 3s ease infinite;
+animation: AnimationName 3s ease infinite;
+
 }
+
+@-webkit-keyframes AnimationName {
+    0%{background-position:0% 92%}
+    50%{background-position:100% 9%}
+    100%{background-position:0% 92%}
+}
+@-moz-keyframes AnimationName {
+    0%{background-position:0% 92%}
+    50%{background-position:100% 9%}
+    100%{background-position:0% 92%}
+}
+@keyframes AnimationName {
+    0%{background-position:0% 92%}
+    50%{background-position:100% 9%}
+    100%{background-position:0% 92%}
+}
+
 body {
 margin: 0;
 }
@@ -37,7 +59,6 @@ min-height: 300px;
 }
 #threejs-container {
 position: relative;
-background:#000;
 color: #101;
 text-align: center;
 padding: 50% 0 0 0;

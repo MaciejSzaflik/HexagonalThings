@@ -49,6 +49,11 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 			app.mixer._actions[0].weight = 0;
 			app.mixer._actions[1].weight = 1;
 		}	
+		this.blendAnims = function()
+		{		  
+			app.mixer._actions[0].weight = 1;
+			app.mixer._actions[1].weight = 3;
+		}	
 	},
 			
 	randomIntFromInterval : function(min,max)
@@ -68,6 +73,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		gui.add(this.GuiVarHolder, 'tryToLock');	
 		gui.add(this.GuiVarHolder, 'walk');
 		gui.add(this.GuiVarHolder, 'wave');
+		gui.add(this.GuiVarHolder, 'blendAnims');
 	},
 	
 
@@ -79,7 +85,6 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 	    this.keyboardInteraction = new THREEx.KeyboardState();
 	 	this.text.push(creator.createText(10,10,10,10));
         this.text[0].innerHTML = "hello"
-	    renderer.setClearColor( 0xff0000, 1 );
 	    
 		
 		document.addEventListener('pointerlockchange', this.changeCallback, false);
@@ -97,12 +102,12 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		
 		var sun = creator.createIco(new THREE.Vector3(0,-35.5,0),40.5,3,scene);
 		sun.material.shading = THREE.FlatShading;
-		var light = new THREE.PointLight( 0xffffff, 1, 200 );
-		var ambientLight = new THREE.AmbientLight( 0x1f1f1f ); 
+		var light = new THREE.PointLight( 0xff00aa, 2, 200 );
+		var ambientLight = new THREE.AmbientLight( 0x5502aa ); 
 		
-		var light2 = new THREE.PointLight( 0xffffff, 1, 200 );
+		var light2 = new THREE.PointLight( 0x550299, 1, 200 );
 		this.addRotateAround(sun,light,100,0.005,new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0));
-		this.addRotateAround(sun,light2,100,0.005,new THREE.Vector3(0,1,0),new THREE.Vector3(0,0,1));
+		this.addRotateAround(sun,light2,100,0.015,new THREE.Vector3(0,1,0),new THREE.Vector3(0.1,0.1,1));
 		scene.add( ambientLight );
 		scene.add( light );
 		scene.add( light2 );
@@ -138,7 +143,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround) {
 		materials[0].side = THREE.DoubleSide
 		materials[0].shading = THREE.FlatShading;
 	    app.mainCharacter = new THREE.SkinnedMesh(geometry,materials[0],false);
-		app.mainCharacter.position.y = 9.59;
+		app.mainCharacter.position.y = 9.2;
 		app.mainCharacter.scale.set(1.3, 1.3, 1.3);
 		scene.add(app.mainCharacter);
 		

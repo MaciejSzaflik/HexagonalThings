@@ -1,9 +1,9 @@
 define( ["three", "container"], function ( THREE, container ) {
   container.innerHTML = "";
-  var renderer = new THREE.WebGLRenderer( { clearColor: 0xffffffff } );
+  var renderer = new THREE.WebGLRenderer( { clearColor: 0xffffffff,	alpha: true } );
   
-  renderer.sortObjects = false;
-  renderer.autoClear = false;
+  renderer.sortObjects = true;
+  renderer.autoClear = true;
   //renderer.setFaceCulling(false,"cw");
   container.appendChild( renderer.domElement );
 
