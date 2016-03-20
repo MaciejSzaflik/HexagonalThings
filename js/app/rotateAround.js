@@ -9,6 +9,7 @@ RotateAround = function ()
 	
 	this.vec1 = 0;
 	this.vec2 = 0;
+	this.ended = false;
 	
 	this.setUp = function(radius,point,angleStep,affectedObject,axisX,axisY)
 	{

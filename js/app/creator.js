@@ -109,6 +109,17 @@ Creator = function ()
 		return object;
 	}
 	
+	this.placeObjectOnSphere = function(objectToSet,parentObject, radius, angleO, angleU)
+	{
+		var positionVector = new THREE.Vector3(
+			radius*Math.cos(angleO)*Math.sin(angleU),
+			radius*Math.sin(angleO)*Math.sin(angleU),
+			radius*Math.cos(angleU)
+		);
+		objectToSet.parent = parentObject;
+		objectToSet.position.set(positionVector.x,positionVector.y,positionVector.z);
+	}
+	
 	this.createIcoheadreon = function(position,sceneToAdd,scale)
 	{
 		var t = (1.0 + Math.sqrt(5))/ 2.0;
@@ -155,7 +166,7 @@ Creator = function ()
 		
 		geom.computeFaceNormals();
 		
-		var object = new THREE.Mesh( geom, new THREE.MeshLambertMaterial() );
+		var object = new THREE.Mesh( geom, new THREE.MeshPhongMaterial() );
 		object.position = position;
 		object.scale = object.scale.multiplyScalar(scale);
 		sceneToAdd.add(object);
