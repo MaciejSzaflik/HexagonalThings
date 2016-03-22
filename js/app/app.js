@@ -116,22 +116,36 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		scene.add( light2 );
 		
 		this.createOrbiting();
+		this.createGrassObjects();
 		
-		var angleStep = Math.PI*0.05;
-		for(var i = 0;i<Math.PI*2;i+=angleStep)
-		{
-			for(var j = 0;j<Math.PI*2;j+=angleStep)
-			{
-				var grassObject = new GrassObject();
-				grassObject.init(creator,scene,app.sun,40,i,j,function(alfa){app.transformations.push(alfa);});
-				app.grassObjects.push(grassObject);
-			}
-		}
-		
-		this.addRotator(app.sun,new THREE.Vector3(-1,0,0),0.3);
 		this.loadMainCharacter();
 		
     },
+	createGrassObjects : function()
+	{
+		var loader = new THREE.TextureLoader();
+		
+		loader.load('./texture/11_5GrassAlpha.jpg', function ( texture ) {
+			var material = new THREE.MeshPhongMaterial(); 
+			material.alphaMap = texture;
+			material.transparent = true;
+			console.log(material);
+			for(var i = 0;i<Math.PI;i+=Math.PI*0.05)
+			{
+				for(var j = 0;j<Math.PI*2;j+=Math.PI*0.05)
+				{
+					var grassObject = new GrassObject();
+					
+					grassObject.init(material,creator,scene,app.sun,39,i + app.getRR(-0.04,0.04),j + app.getRR(-0.04,0.04),function(alfa){app.transformations.push(alfa);});
+					
+					app.grassObjects.push(grassObject);
+				}
+			}
+			
+			app.addRotator(app.sun,new THREE.Vector3(-1,0,0),0.3);
+		});
+	},
+	
 	
 	createOrbiting : function()
 	{
@@ -163,9 +177,9 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		var loader = new THREE.JSONLoader;
 		var animation;
 		var action = {},mixer;
-		loader.load('/models/trying_mirror.json', function (geometry, materials) {
+		loader.load('./models/trying_mirror.json', function (geometry, materials) {
 			materials[0].skinning = true;
-			materials[0].side = THREE.DoubleSide
+			materials[0].side = THREE.DoubleSide;
 			materials[0].shading = THREE.FlatShading;
 			app.mainCharacter = new THREE.SkinnedMesh(geometry,materials[0],false);
 			
@@ -358,9 +372,16 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	changeCallback :function()
 	{
 		var canvas = document.getElementById( 'threejs-container' );
-		var pointerDoc =document.mozPointerLockElement;
-		this.cameraLocked = (canvas === pointerDoc);
-		console.log(this.cameraLocked);
+		
+		if (document.pointerLockElement === canvas ||
+            document.mozPointerLockElement === canvas ||
+             document.webkitPointerLockElement === canvas) {
+		
+			this.cameraLocked = true;
+		}
+		else
+			this.cameraLocked = false;
+			
 	},
 	tryToInitPointLock :function()
 	{

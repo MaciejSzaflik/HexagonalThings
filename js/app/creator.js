@@ -118,6 +118,64 @@ Creator = function()
 		);
 		objectToSet.parent = parentObject;
 		objectToSet.position.set(positionVector.x,positionVector.y,positionVector.z);
+		positionVector.normalize();
+		
+		var multiplerZ = (angleU > Math.PI)?1:-1;
+		var multiplerX = -1;
+		
+		objectToSet.rotation.x = multiplerX*(angleU + Math.PI*0.5);
+		objectToSet.rotation.z = multiplerZ*(angleO + Math.PI*0.5);
+	}
+	
+	this.createThreePlanes = function(material,position,sceneToAdd,scale)
+	{
+		var sq3 = Math.sqrt(2);
+		var sq35 = Math.sqrt(2)*0.5;
+		
+		var geom = new THREE.Geometry();
+		geom.vertices.push(new THREE.Vector3(-1,-2, 0)); //0
+		geom.vertices.push(new THREE.Vector3(-1, 2, 0)); //1
+		geom.vertices.push(new THREE.Vector3( 1, 2, 0)); //2
+		geom.vertices.push(new THREE.Vector3( 1,-2, 0)); //3
+		
+		geom.vertices.push(new THREE.Vector3(-sq35,-2,  sq35)); //4
+		geom.vertices.push(new THREE.Vector3(-sq35, 2,  sq35)); //5
+		geom.vertices.push(new THREE.Vector3( sq35, 2, -sq35)); //6
+		geom.vertices.push(new THREE.Vector3( sq35,-2, -sq35)); //7
+		
+		geom.vertices.push(new THREE.Vector3(-sq35,-2, -sq35)); //8
+		geom.vertices.push(new THREE.Vector3(-sq35, 2, -sq35)); //9
+		geom.vertices.push(new THREE.Vector3( sq35, 2,  sq35)); //10
+		geom.vertices.push(new THREE.Vector3( sq35,-2,  sq35)); //11
+		
+		geom.faces.push( new THREE.Face3( 0, 1, 2));
+		geom.faces.push( new THREE.Face3( 0, 2, 3));
+		
+		geom.faces.push( new THREE.Face3( 4, 5, 6));
+		geom.faces.push( new THREE.Face3( 4, 6, 7));
+		
+		geom.faces.push( new THREE.Face3( 8, 9, 10));
+		geom.faces.push( new THREE.Face3( 8, 10,11));
+		
+		geom.faceVertexUvs[0] = [];
+		var bottom = 1;
+		var top = 0;
+		geom.faceVertexUvs[0].push([ new THREE.Vector2(0,top),new THREE.Vector2(0,bottom),new THREE.Vector2(bottom,bottom)]);
+		geom.faceVertexUvs[0].push([ new THREE.Vector2(0,top),new THREE.Vector2(bottom,bottom),new THREE.Vector2(bottom,top)]);
+		geom.faceVertexUvs[0].push([ new THREE.Vector2(0,top),new THREE.Vector2(0,bottom),new THREE.Vector2(bottom,bottom)]);
+		geom.faceVertexUvs[0].push([ new THREE.Vector2(0,top),new THREE.Vector2(bottom,bottom),new THREE.Vector2(bottom,top)]);
+		geom.faceVertexUvs[0].push([ new THREE.Vector2(0,top),new THREE.Vector2(0,bottom),new THREE.Vector2(bottom,bottom)]);
+		geom.faceVertexUvs[0].push([ new THREE.Vector2(0,top),new THREE.Vector2(bottom,bottom),new THREE.Vector2(bottom,top)]);
+		
+		geom.computeFaceNormals();
+		
+		
+		var object = new THREE.Mesh( geom, material );
+		object.material.side = THREE.DoubleSide;
+		object.position = position;
+		object.scale = object.scale.multiplyScalar(scale);
+		sceneToAdd.add(object);
+		return object;
 	}
 	
 	this.createIcoheadreon = function(position,sceneToAdd,scale)
