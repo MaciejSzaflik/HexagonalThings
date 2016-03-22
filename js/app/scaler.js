@@ -1,4 +1,4 @@
-define( ["three", "scene"], function ( THREE, scene )
+define( ["three", "scene"], function ( THREE, scene ) {
 Scaler = function ()
 {	
 	this.startScale = 0;
@@ -46,4 +46,4 @@ Scaler = function ()
 	
 	this.easeOutQuad = function (t) { return t*(2-t) }
 	
-});
+}});

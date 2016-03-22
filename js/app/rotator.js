@@ -1,4 +1,4 @@
-define( ["three", "scene"], function ( THREE, scene )
+define( ["three", "scene"], function ( THREE, scene )  {
 Rotator = function ()
 {
 	this.axis = 0;
@@ -17,4 +17,4 @@ Rotator = function ()
 	{
 		this.object.rotateOnAxis(this.axis,this.speed*dt);
 	}
-});
+}}	);

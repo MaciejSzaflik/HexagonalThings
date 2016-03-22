@@ -163,7 +163,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		var loader = new THREE.JSONLoader;
 		var animation;
 		var action = {},mixer;
-		loader.load('./trying_mirror.json', function (geometry, materials) {
+		loader.load('./trying_mirror', function (geometry, materials) {
 			materials[0].skinning = true;
 			materials[0].side = THREE.DoubleSide
 			materials[0].shading = THREE.FlatShading;

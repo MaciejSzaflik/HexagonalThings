@@ -1,4 +1,4 @@
-define( ["three", "scene","creator","scaler"], function ( THREE, scene,creator,ScaleTranform)
+define( ["three", "scene","creator","scaler"], function ( THREE, scene,creator,ScaleTranform) {
 GrassObject = function ()
 {
 	this.object = null;
@@ -41,4 +41,4 @@ GrassObject = function ()
 		if(this.addToArray!=null)
 			this.addToArray(scaler)
 	}
-});
+}});

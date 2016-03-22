@@ -1,6 +1,6 @@
-define( ["three", "scene"], function ( THREE, scene )
-Creator = function ()
- {
+define( ["three", "scene"], function( THREE, scene ){
+Creator = function()
+{
     this.numCr = "alfa";
     this.createText =  function(sizeX,sizeY,posX,posY)
     {	
@@ -172,6 +172,6 @@ Creator = function ()
 		sceneToAdd.add(object);
 		return object;
 	}
-	
-  });
+	}
+});
 

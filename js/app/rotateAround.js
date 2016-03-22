@@ -1,4 +1,4 @@
-define( ["three", "scene"], function ( THREE, scene )
+define( ["three", "scene"], function ( THREE, scene ){
 RotateAround = function ()
 {
 	this.center = 0;
@@ -36,4 +36,4 @@ RotateAround = function ()
 		//console.log(x + " " +y + " " + z);
 		this.object.position.set(x,y,z); 
 	}
-});
+}});
