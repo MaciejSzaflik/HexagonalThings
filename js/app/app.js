@@ -1,6 +1,6 @@
 define( ["three", "camera", "renderer", 
-"scene","dat","KeyboardState","creator","rotator","rotateAround","scaler","grassObject"],
-function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTranform, grassObject) {
+"scene","dat","KeyboardState","creator","rotator","rotateAround","scaler","grassObject","shader!glowVert.vert", "shader!glowFrag.frag","sinMove"],
+function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTranform, grassObject,glowVert,glowFrag,sinMove) {
   var app = {
   
     GuiVarHolder : null,
@@ -33,6 +33,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	currentUp : new THREE.Vector3(0,0,1),
 	mainCharacter : null,
 	sun : null,
+	glowMaterial : null,
 			
 	FizzyText :function()
 	{
@@ -45,7 +46,6 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		{		  
 			app.mixer._actions[0].weight = 1;
 			app.mixer._actions[1].weight = 0;
-			app.mixer.timeScale = 90;
 		}
 		this.wave = function()
 		{		  
@@ -86,72 +86,104 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		creator = new Creator();
         this.initializeGUI();
 	    this.keyboardInteraction = new THREEx.KeyboardState();
-	 	this.text.push(creator.createText(10,10,10,10));
-        this.text[0].innerHTML = "hello"
 	    
-		
 		document.addEventListener('pointerlockchange', this.changeCallback, false);
 	    document.addEventListener('mozpointerlockchange', this.changeCallback, false);
 	    document.addEventListener('webkitpointerlockchange', this.changeCallback, false);
 
 	    document.addEventListener("mousemove", this.moveCallback, false);
-		
-		//document.addEventListener("mousemove", this.moveCallback, false);
-		
-		var size = 4;
-		//creator.createHexMap(new THREE.Vector3(0,-24),size,8,12,0,scene);
 	    
 	    window.requestAnimationFrame( app.animate );
 		
-		app.sun = creator.createIco (new THREE.Vector3(0,-35.5,0),40.5,3,scene);
-		app.sun.material.shading = THREE.FlatShading;
-		var light = new THREE.PointLight( 0xff0055, 2, 200 );
-		var ambientLight = new THREE.AmbientLight( 0x220022 ); 
-		
-		var light2 = new THREE.PointLight( 0x22aaff, 1, 200 );
-		this.addRotateAround(app.sun,light,100,0.005,new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0));
-		this.addRotateAround(app.sun,light2,100,0.015,new THREE.Vector3(0,1,0),new THREE.Vector3(0.1,0.1,1));
-		scene.add( ambientLight );
-		scene.add( light );
-		scene.add( light2 );
-		
+		this.createCustomMaterial();
+		this.createLightsAndMain();
 		this.createOrbiting();
 		this.createGrassObjects();
-		
+		this.createStars();
 		this.loadMainCharacter();
 		
     },
+	
+	createCustomMaterial : function()
+	{
+		//console.log(glowFrag);
+		/*glowMaterial = new THREE.ShaderMaterial( 
+		{
+			uniforms: 
+			{ 
+				"c":   { type: "f", value: 1.0 },
+				"p":   { type: "f", value: 1.4 },
+				glowColor: { type: "c", value: new THREE.Color(0xffff00) },
+				viewVector: { type: "v3", value: camera.position }
+			},
+			vertexShader:  glow.value,
+			fragmentShader: glow.value,
+			side: THREE.FrontSide,
+			blending: THREE.AdditiveBlending,
+			transparent: true
+		}   );*/
+	},
+	
+	createLightsAndMain : function()
+	{
+		app.sun = creator.createIco (new THREE.Vector3(0,-35.5,0),20.5,3,scene);
+		app.sun.material.shading = THREE.FlatShading;
+		var light = new THREE.PointLight( 0xff0055, 4, 500 );
+		var ambientLight = new THREE.AmbientLight( 0x220022 ); 
+		
+		var light2 = new THREE.PointLight( 0x22aaff, 3, 500 );
+		this.addRotateAround(app.sun,light,200,0.005,new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0));
+		this.addRotateAround(app.sun,light2,200,0.015,new THREE.Vector3(0,1,0),new THREE.Vector3(0.1,0.1,1));
+		scene.add( ambientLight );
+		scene.add( light );
+		scene.add( light2 );
+	},
 	createGrassObjects : function()
 	{
 		var loader = new THREE.TextureLoader();
-		
 		loader.load('./texture/11_5GrassAlpha.jpg', function ( texture ) {
 			var material = new THREE.MeshPhongMaterial(); 
 			material.alphaMap = texture;
 			material.transparent = true;
-			console.log(material);
 			for(var i = 0;i<Math.PI;i+=Math.PI*0.05)
 			{
 				for(var j = 0;j<Math.PI*2;j+=Math.PI*0.05)
 				{
 					var grassObject = new GrassObject();
 					
-					grassObject.init(material,creator,scene,app.sun,39,i + app.getRR(-0.04,0.04),j + app.getRR(-0.04,0.04),function(alfa){app.transformations.push(alfa);});
+					grassObject.init(material,creator,scene,app.sun,19,i + app.getRR(-0.04,0.04),j + app.getRR(-0.04,0.04),function(alfa){app.transformations.push(alfa);});
 					
 					app.grassObjects.push(grassObject);
 				}
 			}
 			
-			app.addRotator(app.sun,new THREE.Vector3(-1,0,0),0.3);
+			app.addRotator(app.sun,new THREE.Vector3(-1,0,0),0.6);
+		});
+	},
+	createStars : function()
+	{
+		var loader = new THREE.TextureLoader();
+		loader.load('./texture/particle.png', function ( texture ) {
+			var pMaterial = new THREE.PointsMaterial({
+				  color: 0xFFFFFF,
+				  size: 2,
+				  vertexColors : THREE.VertexColors,
+				  map : texture,
+				  transparent : true
+			});
+			var pointCloud = creator.createPointsCloud(pMaterial,10000,400,scene);
+			app.addRotator(pointCloud,new THREE.Vector3(1,1,0),0.15);
+			var pointCloud = creator.createPointsCloud(pMaterial,5000,800,scene);
+			app.addRotator(pointCloud,new THREE.Vector3(0,1,1),0.1);
 		});
 	},
 	
-	
 	createOrbiting : function()
 	{
+		var material = new THREE.MeshPhongMaterial();
 		for(var i = 0;i<20;i++)
 		{
-			var planet = creator.createIcoheadreon(new THREE.Vector3(10,0,0),scene,this.getRR(1.0,1.5));
+			var planet = creator.createIcoheadreon(material,new THREE.Vector3(10,0,0),scene,this.getRR(1.0,1.5));
 			planet.position.set(100,10,10);
 			this.addRotator(planet,new THREE.Vector3(2,1,3),3);
 			
@@ -161,7 +193,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			var numberOfMoons = this.getRR(0,3);
 			for(var j = 0;j<numberOfMoons;j++)
 			{
-				var moon = creator.createIcoheadreon(new THREE.Vector3(-5,0,0),scene,this.getRR(0.2,0.6));
+				var moon = creator.createIcoheadreon(material,new THREE.Vector3(-5,0,0),scene,this.getRR(0.2,0.6));
 				
 				this.addRotator(moon,new THREE.Vector3(0,1,0),1);
 				axisX = this.getRV(0,1,0,1,0,1);
@@ -185,8 +217,8 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			
 			scene.add(app.mainCharacter);
 				
-			app.mainCharacter.position.set(0, 9.2, 0);
-			app.mainCharacter.scale.set(1.3, 1.3, 1.3);
+			app.mainCharacter.position.set(0, -6, 0);
+			app.mainCharacter.scale.set(2.8, 2.8, 2.8);
 		
 			app.mixer = new THREE.AnimationMixer( app.mainCharacter );
 			
@@ -194,6 +226,19 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			app.mixer.clipAction( app.mainCharacter.geometry.animations[ 3 ],0 ).play();
 			app.mixer._actions[0].weight = 1;
 			app.mixer._actions[1].weight = 0;
+			
+			var light = new THREE.PointLight( 0x00ffcc,2, 70 );
+			var littleLight = creator.createIcoheadreon(new THREE.MeshPhongMaterial(),new THREE.Vector3(10,0,0),scene,0.3);
+			littleLight.material = new THREE.MeshBasicMaterial();
+			littleLight.parent = app.mainCharacter;
+			littleLight.position.set(8,3,0);
+			
+			light.position.set(0,0,0);
+			scene.add(littleLight);
+			scene.add(light);
+			light.parent = littleLight;
+			app.addSinMove(2,new THREE.Vector3(1,2,0),littleLight);
+			app.addRotator(littleLight,new THREE.Vector3(0,1,0),3);
 			
 		});
 	},
@@ -213,6 +258,14 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	getRadVec : function(constX,mulX,constY,mulY,constZ,mulZ)
 	{
 		return new THREE.Vector3(constX + mulX*Math.random(),constY + mulY*Math.random(),constZ + mulZ*Math.random());
+	},
+	
+	addSinMove : function(speed,offset,object)
+	{
+		var sinMove = new SinMove();
+		sinMove.setUp(speed,offset,object);
+		this.transformations.push(sinMove);
+		return sinMove;
 	},
 	addRotator : function(object,axis,speed)
 	{
@@ -291,7 +344,6 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	
 	moveCallback : function(e)
 	{
-		//console.log(app.cameraLocked);
 		if(app && this.cameraLocked)
 		{
 
@@ -403,10 +455,8 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			  document.mozPointerLockElement === element ||
 			  document.webkitPointerLockElement === element) {
 				this.cameraLocked = true;
-				console.log('The pointer lock status is now locked');
 			} else {
-				this.cameraLocked = true;
-				console.log('The pointer lock status is now unlocked');  
+				this.cameraLocked = true; 
 			}
 			
 		}

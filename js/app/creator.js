@@ -178,7 +178,38 @@ Creator = function()
 		return object;
 	}
 	
-	this.createIcoheadreon = function(position,sceneToAdd,scale)
+	this.createPointsCloud = function(material,number,spread,sceneToAdd)
+	{
+		var particles = new THREE.Geometry();
+
+		for (var p = 0; p < number; p++) {
+			particles.vertices.push(this.getRV(-spread,spread,-spread,spread,-spread,spread));
+			particles.colors.push(new THREE.Color(this.getRR(0.7,1),0.4,this.getRR(0.7,1)));
+		}
+
+		var pointCloud = new THREE.Points(particles,material);
+		sceneToAdd.add(pointCloud);
+		return pointCloud;
+	}
+	
+	this.getRR =function(min, max) 
+	{
+		return Math.random() * (max - min) + min;
+	}
+	this.getRV =function(minX, maxX,minY, maxY,minZ, maxZ) 
+	{
+		return new THREE.Vector3(this.getRR(minX,maxX),this.getRR(minY,maxY),this.getRR(minZ,maxZ));
+	}
+	this.getRand =function(constV,mulV)
+	{
+		return constV + Math.random()*mulV;
+	}
+	this.getRadVec =function(constX,mulX,constY,mulY,constZ,mulZ)
+	{
+		return new THREE.Vector3(constX + mulX*Math.random(),constY + mulY*Math.random(),constZ + mulZ*Math.random());
+	}
+	
+	this.createIcoheadreon = function(material,position,sceneToAdd,scale)
 	{
 		var t = (1.0 + Math.sqrt(5))/ 2.0;
 		var geom = new THREE.Geometry();
@@ -224,7 +255,7 @@ Creator = function()
 		
 		geom.computeFaceNormals();
 		
-		var object = new THREE.Mesh( geom, new THREE.MeshPhongMaterial() );
+		var object = new THREE.Mesh( geom, material );
 		object.position = position;
 		object.scale = object.scale.multiplyScalar(scale);
 		sceneToAdd.add(object);
