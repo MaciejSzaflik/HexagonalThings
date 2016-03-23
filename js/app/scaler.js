@@ -28,7 +28,7 @@ Scaler = function ()
 		this.eclapsedTime+=dt;
 		if(this.eclapsedTime<=this.speed)
 		{
-			var currentS = this.startScale.lerp(this.endScale,Math.min(this.easeOutQuad(this.eclapsedTime/this.speed),1));
+			var currentS = new THREE.Vector3().lerpVectors(this.startScale,this.endScale,Math.min(this.easeOutQuad(this.eclapsedTime/this.speed),1));
 			this.object.scale.set(currentS.x,currentS.y,currentS.z);
 		}
 		else
@@ -36,8 +36,6 @@ Scaler = function ()
 			if(!this.ended && this.callBack!=null)
 			{
 				this.callBack();
-				//if(this.disableAtEnd)
-				//	this.affectedObject.visible = false;
 				this.ended = true;
 			}
 			this.ended = true;

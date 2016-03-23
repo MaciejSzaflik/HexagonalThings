@@ -26,12 +26,12 @@ GrassObject = function ()
 		{
 			this.object.visible = true;
 			this.isDisappearing = false;
-			this.addScaleTransform(this.scaleDown.clone(),this.scaleUp.clone(),2.0,this.object,true);
+			this.addScaleTransform(this.scaleDown.clone(),this.scaleUp.clone(),1.0,this.object,true);
 		}
 		else if(dist>distanceCheck && !this.isDisappearing)
 		{
 			this.isDisappearing = true;
-			this.addScaleTransform(this.scaleUp.clone(),this.scaleDown.clone(),3.5,this.object,false);
+			this.addScaleTransform(this.scaleUp.clone(),this.scaleDown.clone(),2.5,this.object,false);
 
 		}
 	}
