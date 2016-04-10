@@ -22,6 +22,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	cameraLocked : false,
 	mixer : null,
 	grassObjects : [],
+	objects : [],
 	
 	lastX : 0,
 	lastY : 0,
@@ -91,6 +92,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	    document.addEventListener('mozpointerlockchange', this.changeCallback, false);
 	    document.addEventListener('webkitpointerlockchange', this.changeCallback, false);
 
+		document.addEventListener("click", this.mouseClick, false)
 	    document.addEventListener("mousemove", this.moveCallback, false);
 	    
 	    window.requestAnimationFrame( app.animate );
@@ -130,13 +132,15 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		app.sun.material.shading = THREE.FlatShading;
 		var light = new THREE.PointLight( 0xff0055, 4, 500 );
 		var ambientLight = new THREE.AmbientLight( 0x220022 ); 
-		
+		app.sun.name = "Sun";
 		var light2 = new THREE.PointLight( 0x22aaff, 3, 500 );
 		this.addRotateAround(app.sun,light,200,0.005,new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0));
 		this.addRotateAround(app.sun,light2,200,0.015,new THREE.Vector3(0,1,0),new THREE.Vector3(0.1,0.1,1));
 		scene.add( ambientLight );
 		scene.add( light );
 		scene.add( light2 );
+		
+		this.objects.push(app.sun);
 	},
 	createGrassObjects : function()
 	{
@@ -150,8 +154,15 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 				for(var j = 0;j<Math.PI*2;j+=Math.PI*0.05)
 				{
 					var grassObject = new GrassObject();
-					
-					grassObject.init(material,creator,scene,app.sun,19,i + app.getRR(-0.04,0.04),j + app.getRR(-0.04,0.04),function(alfa){app.transformations.push(alfa);});
+					grassObject.init(
+						material,
+						creator,
+						scene,
+						app.sun
+						,19
+						,i + app.getRR(-0.04,0.04)
+						,j + app.getRR(-0.04,0.04)
+						,function(alfa){app.transformations.push(alfa);});
 					
 					app.grassObjects.push(grassObject);
 				}
@@ -346,21 +357,44 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	{
 		if(app && this.cameraLocked)
 		{
+			var vec = app.parseEvent(e);
+			app.calculateCameraRotation(vec.x,vec.y);
+		}	
+	},
 
+	parseEvent : function(e)
+	{
 		var movementX = e.movementX ||
 			  e.mozMovementX        ||
 			  e.webkitMovementX     ||
-			  0,
+				  0,
 			movementY = e.movementY ||
 			  e.mozMovementY        ||
-			  e.webkitMovementY     ||
-			  0;
+		      e.webkitMovementY     ||
+				  0;
 		
+		return new THREE.Vector2(movementX,movementY);
+	},
+	
+	mouseClick : function(e)
+	{
+		var mouse = new THREE.Vector2();
+		mouse.x = ( e.clientX / window.innerWidth ) * 2 - 1;
+		mouse.y = - ( e.clientY / window.innerHeight ) * 2 + 1;
 		
-		app.calculateCameraRotation(movementX,movementY);
-		}	
-	},	
+		raycaster = new THREE.Raycaster();
+		raycaster.linePrecision = 3;
+		
+		raycaster.setFromCamera( mouse, camera );
+		var intersects = raycaster.intersectObject(app.sun, false);
+		if(intersects.length>0)
+		{
+			console.log(intersects[0].object.name);
+			var obj = creator.createIco (intersects[0].point,2.5,1,scene);
 			
+		}
+	},	
+	
 	calculateCameraRotation : function(movementX,movementY)
 	{
 		var x = movementX/app.renderer.domElement.width;
@@ -379,8 +413,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		quatX.setFromAxisAngle( new THREE.Vector3(0,1,0), app.angleX);
 		quatY.setFromAxisAngle( new THREE.Vector3(1,0,0), app.angleY);
 		camera.quaternion.multiplyQuaternions(quatX,quatY);
-		
 	},	
+	
+	
+	
 	cameraLookDir: function(camera) {
         var vector = new THREE.Vector3(0, 0, -1);
         vector.applyEuler(camera.rotation, camera.rotation.order);
