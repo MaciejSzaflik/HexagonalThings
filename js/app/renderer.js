@@ -1,6 +1,6 @@
 define( ["three", "container"], function ( THREE, container ) {
   container.innerHTML = "";
-  var renderer = new THREE.WebGLRenderer( { clearColor: 0xffffffff,	alpha: true } );
+  var renderer = new THREE.WebGLRenderer( {antialias:true,  clearColor: 0xffffffff,	alpha: true } );
   
   renderer.sortObjects = true;
   renderer.autoClear = true;

@@ -1,5 +1,5 @@
 define( ["three", "camera", "renderer", 
-"scene","dat","KeyboardState","creator","rotator","rotateAround","scaler","grassObject","shader!glowVert.vert", "shader!glowFrag.frag","sinMove"],
+"scene","dat","KeyboardState","creator","rotator","rotateAround","scaler","grassObject","shader!glowVert.vert", "shader!glowFrag.frag","sinMove","moveArc"],
 function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTranform, grassObject,glowVert,glowFrag,sinMove) {
   var app = {
   
@@ -168,7 +168,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 				}
 			}
 			
-			app.addRotator(app.sun,new THREE.Vector3(-1,0,0),0.6);
+			//app.addRotator(app.sun,new THREE.Vector3(-1,0,0),0.6);
 		});
 	},
 	createStars : function()
@@ -235,8 +235,8 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			
 			app.mixer.clipAction( app.mainCharacter.geometry.animations[ 1 ],0 ).play();
 			app.mixer.clipAction( app.mainCharacter.geometry.animations[ 3 ],0 ).play();
-			app.mixer._actions[0].weight = 1;
-			app.mixer._actions[1].weight = 0;
+			app.mixer._actions[0].weight = 0;
+			app.mixer._actions[1].weight = 1;
 			
 			var light = new THREE.PointLight( 0x00ffcc,2, 70 );
 			var littleLight = creator.createIcoheadreon(new THREE.MeshPhongMaterial(),new THREE.Vector3(10,0,0),scene,0.3);
@@ -284,6 +284,13 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		rotator.setUp(axis,speed,object);
 		this.transformations.push(rotator);
 		return rotator;
+	},
+	addMoveArc : function(object,pointA,pointB,speed)
+	{
+		var mover = new MoveArc();
+		mover.setUp(pointA,pointB,app.sun.position,speed,object);
+		this.transformations.push(mover);
+		return mover;
 	},
 	addScaleTransform : function(start,end,speed,object)
 	{
@@ -389,9 +396,9 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		var intersects = raycaster.intersectObject(app.sun, false);
 		if(intersects.length>0)
 		{
-			console.log(intersects[0].object.name);
 			var obj = creator.createIco (intersects[0].point,2.5,1,scene);
-			
+			//app.	Arc(app.mainCharacter,app.mainCharacter.position.clone(),intersects[0].point,3);
+		    app.addMoveArc(obj,app.mainCharacter.position.clone(),intersects[0].point,3);
 		}
 	},	
 	
