@@ -23,6 +23,8 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	mixer : null,
 	grassObjects : [],
 	objects : [],
+	lights : [],
+	lightColorsParams : {rotating1: "#ff0055",rotating2: "#22aaff",ambient: "#220022",near: "#00ffcc" },
 	
 	lastX : 0,
 	lastY : 0,
@@ -58,6 +60,13 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			app.mixer._actions[0].weight = 1;
 			app.mixer._actions[1].weight = 3;
 		}	
+		this.changeLightsColors = function()
+		{		  
+			app.lights["rotating1"].color = new THREE.Color(app.lightColorsParams["rotating1"]);
+			app.lights["rotating2"].color = new THREE.Color(app.lightColorsParams["rotating2"]);
+			app.lights["ambient"].color = new THREE.Color(app.lightColorsParams["ambient"]);
+			app.lights["companion"].color = new THREE.Color(app.lightColorsParams["near"]);
+		}
 	},
 			
 	randomIntFromInterval : function(min,max)
@@ -78,6 +87,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		gui.add(this.GuiVarHolder, 'walk');
 		gui.add(this.GuiVarHolder, 'wave');
 		gui.add(this.GuiVarHolder, 'blendAnims');
+		gui.addColor(app.lightColorsParams,'rotating1').onChange(this.GuiVarHolder.changeLightsColors);
+		gui.addColor(app.lightColorsParams,'rotating2').onChange(this.GuiVarHolder.changeLightsColors);
+		gui.addColor(app.lightColorsParams,'ambient').onChange(this.GuiVarHolder.changeLightsColors);
+		gui.addColor(app.lightColorsParams,'near').onChange(this.GuiVarHolder.changeLightsColors);
 	},
 	
 
@@ -139,6 +152,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		scene.add( ambientLight );
 		scene.add( light );
 		scene.add( light2 );
+		
+		app.lights["rotating1"] = light;
+		app.lights["ambient"] = ambientLight;
+		app.lights["rotating2"] = light2;
 		
 		this.objects.push(app.sun);
 	},
@@ -239,6 +256,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			app.mixer._actions[1].weight = 1;
 			
 			var light = new THREE.PointLight( 0x00ffcc,2, 70 );
+			app.lights["companion"] = light;
 			var littleLight = creator.createIcoheadreon(new THREE.MeshPhongMaterial(),new THREE.Vector3(10,0,0),scene,0.3);
 			littleLight.material = new THREE.MeshBasicMaterial();
 			littleLight.parent = app.mainCharacter;
