@@ -34,14 +34,23 @@ MoveArc = function ()
 		this.eclapsedTime+=dt;
 		if(this.eclapsedTime<=this.speed)
 		{
-			var currentS = new THREE.Vector3().lerpVectors(this.startPosition,this.endPosition,Math.min(this.easeOutQuad(this.eclapsedTime/this.speed),1));
+			var currentS = new THREE.Vector3().lerpVectors(this.startPosition,this.endPosition,Math.min(this.eclapsedTime/this.speed,1));
 			
 			var dir = (new THREE.Vector3().subVectors(this.center,currentS));
 			
 			var ray = new THREE.Ray(this.center,dir.normalize().negate());
-			var newVector = ray.at(50);
+			var newVector = ray.at(30);
 			this.object.position.set(newVector.x,newVector.y,newVector.z);
-		
+			
+			var upVector = new THREE.Vector3(0,1,0);
+			var rayDir = ray.direction;
+			var axis = new THREE.Vector3();
+			axis.crossVectors( upVector, rayDir );
+			var angle = Math.acos(upVector.dot(rayDir));
+
+			var toSphereRot = new THREE.Quaternion();
+			toSphereRot.setFromAxisAngle(axis, angle );
+			this.object.rotation.setFromQuaternion(toSphereRot);	
 		}
 		else
 		{

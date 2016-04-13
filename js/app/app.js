@@ -37,6 +37,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	mainCharacter : null,
 	sun : null,
 	glowMaterial : null,
+	modelY : 0,
 			
 	FizzyText :function()
 	{
@@ -47,19 +48,24 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		}
 		this.walk = function()
 		{		  
-			app.mixer._actions[0].weight = 1;
-			app.mixer._actions[1].weight = 0;
+			app.characterWalk();
 		}
 		this.wave = function()
 		{		  
-			app.mixer._actions[0].weight = 0;
-			app.mixer._actions[1].weight = 1;
-		}	
+			app.characterWave();
+		}
+		
 		this.blendAnims = function()
 		{		  
 			app.mixer._actions[0].weight = 1;
 			app.mixer._actions[1].weight = 3;
 		}	
+		
+		this.changeRotY = function()
+		{		  
+			app.mainCharacter.rotation.y = app.modelY;
+		}
+		
 		this.changeLightsColors = function()
 		{		  
 			app.lights["rotating1"].color = new THREE.Color(app.lightColorsParams["rotating1"]);
@@ -87,13 +93,25 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		gui.add(this.GuiVarHolder, 'walk');
 		gui.add(this.GuiVarHolder, 'wave');
 		gui.add(this.GuiVarHolder, 'blendAnims');
+		gui.add(app,'modelY',0,Math.PI*2).onChange(this.GuiVarHolder.changeRotY);
 		gui.addColor(app.lightColorsParams,'rotating1').onChange(this.GuiVarHolder.changeLightsColors);
 		gui.addColor(app.lightColorsParams,'rotating2').onChange(this.GuiVarHolder.changeLightsColors);
 		gui.addColor(app.lightColorsParams,'ambient').onChange(this.GuiVarHolder.changeLightsColors);
 		gui.addColor(app.lightColorsParams,'near').onChange(this.GuiVarHolder.changeLightsColors);
 	},
 	
-
+	characterWalk: function()
+	{
+		app.mixer._actions[0].weight = 1;
+		app.mixer._actions[1].weight = 0;
+	},
+	
+	characterWave: function()
+	{
+		app.mixer._actions[0].weight = 0;
+		app.mixer._actions[1].weight = 1;
+	},
+	
     init: function () 
     {
 		clockFrame = new THREE.Clock();
@@ -303,10 +321,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		this.transformations.push(rotator);
 		return rotator;
 	},
-	addMoveArc : function(object,pointA,pointB,speed)
+	addMoveArc : function(object,pointA,pointB,speed,cb)
 	{
 		var mover = new MoveArc();
-		mover.setUp(pointA,pointB,app.sun.position,speed,object);
+		mover.setUp(pointA,pointB,app.sun.position,speed,object,cb);
 		this.transformations.push(mover);
 		return mover;
 	},
@@ -415,8 +433,8 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		if(intersects.length>0)
 		{
 			var obj = creator.createIco (intersects[0].point,2.5,1,scene);
-			//app.	Arc(app.mainCharacter,app.mainCharacter.position.clone(),intersects[0].point,3);
-		    app.addMoveArc(obj,app.mainCharacter.position.clone(),intersects[0].point,3);
+		    app.addMoveArc(app.mainCharacter,app.mainCharacter.position.clone(),intersects[0].point,3, app.characterWave);
+			app.characterWalk();
 		}
 	},	
 	
