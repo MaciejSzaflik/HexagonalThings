@@ -432,7 +432,6 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		var intersects = raycaster.intersectObject(app.sun, false);
 		if(intersects.length>0)
 		{
-			var obj = creator.createIco (intersects[0].point,2.5,1,scene);
 		    app.addMoveArc(app.mainCharacter,app.mainCharacter.position.clone(),intersects[0].point,3, app.characterWave);
 			app.characterWalk();
 		}
