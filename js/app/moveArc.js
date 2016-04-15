@@ -6,27 +6,24 @@ MoveArc = function ()
     this.center = 0;
     this.progress = 0;
     this.speed = 0;
+	this.distance = 0;
     this.object = null;
     this.eclapsedTime = 0;
     this.ended = false;
     this.callBack = null;
+	this.cancelable = true;
     
-    this.setUp = function(startPosition,endPosition,center,speed,affectedObject,callBack)
+    this.setUp = function(distance,startPosition,endPosition,center,speed,affectedObject,callBack)
     {
         this.progress = 0;
         this.startPosition = startPosition;
         this.endPosition = endPosition;
+		this.distance = distance;
         this.center = center;
         this.speed = speed;
         this.object = affectedObject;
         this.object.position.set(startPosition.x,startPosition.y,startPosition.z);
-        this.callBack = callBack;
-        
-        //var creator = new Creator();
-        
-        //var ray = new THREE.Ray(this.center,endPosition.normalize());
-        //creator.createLine(this.center,ray.at(50),'red',scene);
-        
+        this.callBack = callBack;  
     }
     
     this.update = function(dt)
@@ -39,7 +36,7 @@ MoveArc = function ()
             var dirone = (new THREE.Vector3().subVectors(this.center,currentS));
             
             var ray = new THREE.Ray(this.center,dirone.normalize().negate());
-            var newVector = ray.at(30);
+            var newVector = ray.at(this.distance);
             this.object.position.set(newVector.x,newVector.y,newVector.z);
             
             var upVector =  (new THREE.Vector3().subVectors(this.object.position,this.center)).normalize();

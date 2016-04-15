@@ -1,5 +1,5 @@
 define( ["three", "camera", "renderer", 
-"scene","dat","KeyboardState","creator","rotator","rotateAround","scaler","grassObject","shader!glowVert.vert", "shader!glowFrag.frag","sinMove","moveArc"],
+"scene","dat","KeyboardState","creator","rotator","rotateAround","scaler","grassObject","shader!glowVert.vert", "shader!glowFrag.frag","sinMove","moveArc","sinScale"],
 function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTranform, grassObject,glowVert,glowFrag,sinMove) {
   var app = {
   
@@ -37,7 +37,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 	mainCharacter : null,
 	sun : null,
 	glowMaterial : null,
-	modelY : 0,
+	grassDistance : 20,
 			
 	FizzyText :function()
 	{
@@ -60,11 +60,6 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			app.mixer._actions[0].weight = 1;
 			app.mixer._actions[1].weight = 3;
 		}	
-		
-		this.changeRotY = function()
-		{		  
-			app.mainCharacter.rotation.y = app.modelY;
-		}
 		
 		this.changeLightsColors = function()
 		{		  
@@ -93,7 +88,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		gui.add(this.GuiVarHolder, 'walk');
 		gui.add(this.GuiVarHolder, 'wave');
 		gui.add(this.GuiVarHolder, 'blendAnims');
-		gui.add(app,'modelY',0,Math.PI*2).onChange(this.GuiVarHolder.changeRotY);
+		gui.add(app,'grassDistance',0,40);
 		gui.addColor(app.lightColorsParams,'rotating1').onChange(this.GuiVarHolder.changeLightsColors);
 		gui.addColor(app.lightColorsParams,'rotating2').onChange(this.GuiVarHolder.changeLightsColors);
 		gui.addColor(app.lightColorsParams,'ambient').onChange(this.GuiVarHolder.changeLightsColors);
@@ -165,6 +160,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		var ambientLight = new THREE.AmbientLight( 0x220022 ); 
 		app.sun.name = "Sun";
 		var light2 = new THREE.PointLight( 0x22aaff, 3, 500 );
+		
 		this.addRotateAround(app.sun,light,200,0.005,new THREE.Vector3(1,0,0),new THREE.Vector3(0,1,0));
 		this.addRotateAround(app.sun,light2,200,0.015,new THREE.Vector3(0,1,0),new THREE.Vector3(0.1,0.1,1));
 		scene.add( ambientLight );
@@ -235,7 +231,9 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			
 			var axisX = this.getRV(0,1,0,1,0,1).multiplyScalar(i%2==1?1:-1);
 			var axisY = this.getRV(0,1,0,1,0,1).multiplyScalar(i%2==0?1:-1);
-			this.addRotateAround(	app.sun,planet,this.getRR(100,120) + i,this.getRR(0.001,0.01),axisX,axisY);
+			this.addRotateAround(app.sun,planet,this.getRR(100,120) + i,this.getRR(0.001,0.01),axisX,axisY);
+			this.addSinScale(this.getRR(1.0,5.5),this.getRV(0.5,1,0.5,1,0.5,1),planet);
+			
 			var numberOfMoons = this.getRR(0,3);
 			for(var j = 0;j<numberOfMoons;j++)
 			{
@@ -263,7 +261,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			
 			scene.add(app.mainCharacter);
 				
-			app.mainCharacter.position.set(0, -6, 0);
+			app.mainCharacter.position.set(0, -5, 0);
 			app.mainCharacter.scale.set(2.8, 2.8, 2.8);
 		
 			app.mixer = new THREE.AnimationMixer( app.mainCharacter );
@@ -273,18 +271,18 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 			app.mixer._actions[0].weight = 0;
 			app.mixer._actions[1].weight = 1;
 			
-			var light = new THREE.PointLight( 0x00ffcc,2, 70 );
+			var light = new THREE.PointLight( 0x00ffcc,1, 70 );
 			app.lights["companion"] = light;
-			var littleLight = creator.createIcoheadreon(new THREE.MeshPhongMaterial(),new THREE.Vector3(10,0,0),scene,0.3);
+			var littleLight = creator.createIcoheadreon(new THREE.MeshPhongMaterial(),new THREE.Vector3(10,0,0),scene,0.1);
 			littleLight.material = new THREE.MeshBasicMaterial();
 			littleLight.parent = app.mainCharacter;
-			littleLight.position.set(8,3,0);
-			
+			littleLight.position.set(3,1.5,0);
+			littleLight.add(light);
 			light.position.set(0,0,0);
-			scene.add(littleLight);
-			scene.add(light);
-			light.parent = littleLight;
-			app.addSinMove(2,new THREE.Vector3(1,2,0),littleLight);
+			
+			app.mainCharacter.add(littleLight);
+				
+			app.addSinMove(2,new THREE.Vector3(0,0.5,0),littleLight);
 			app.addRotator(littleLight,new THREE.Vector3(0,1,0),3);
 			
 		});
@@ -314,6 +312,13 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		this.transformations.push(sinMove);
 		return sinMove;
 	},
+	addSinScale : function(speed,offset,object)
+	{
+		var sinScale = new SinScale();
+		sinScale.setUp(speed,offset,object);
+		this.transformations.push(sinScale);
+		return sinScale;
+	},
 	addRotator : function(object,axis,speed)
 	{
 		var rotator = new Rotator();
@@ -321,10 +326,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		this.transformations.push(rotator);
 		return rotator;
 	},
-	addMoveArc : function(object,pointA,pointB,speed,cb)
+	addMoveArc : function(distance,object,pointA,pointB,speed,cb)
 	{
 		var mover = new MoveArc();
-		mover.setUp(pointA,pointB,app.sun.position,speed,object,cb);
+		mover.setUp(distance,pointA,pointB,app.sun.position,speed,object,cb);
 		this.transformations.push(mover);
 		return mover;
 	},
@@ -368,7 +373,7 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		{
 			for(var i = 0;i<app.grassObjects.length;i++)
 			{
-				app.grassObjects[i].checkDistance(app.mainCharacter.position,20);
+				app.grassObjects[i].checkDistance(app.mainCharacter.position,app.grassDistance);
 			}
 		}
 		
@@ -432,8 +437,10 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		var intersects = raycaster.intersectObject(app.sun, false);
 		if(intersects.length>0)
 		{
-		    app.addMoveArc(app.mainCharacter,app.mainCharacter.position.clone(),intersects[0].point,3, app.characterWave);
-			app.characterWalk();
+			app.transformations = app.transformations.filter(function (e) {return !e.cancelable;});
+			var distance = app.mainCharacter.position.clone().distanceTo(intersects[0].point);
+		    app.addMoveArc(30,app.mainCharacter,app.mainCharacter.position.clone(),intersects[0].point, distance/15 , app.characterWave);
+			app.characterWalk()	;
 		}
 	},	
 	
