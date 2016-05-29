@@ -254,10 +254,11 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		var animation;
 		var action = {},mixer;
 		loader.load('./models/trying_mirror.json', function (geometry, materials) {
-			materials[0].skinning = true;
-			materials[0].side = THREE.DoubleSide;
-			materials[0].shading = THREE.FlatShading;
-			app.mainCharacter = new THREE.SkinnedMesh(geometry,materials[0],false);
+			var mat = materials[0];
+			mat.skinning = true;
+			mat.side = THREE.DoubleSide;
+			mat.shading = THREE.FlatShading;
+			app.mainCharacter = new THREE.SkinnedMesh(geometry,mat);
 			
 			scene.add(app.mainCharacter);
 				
@@ -266,8 +267,8 @@ function ( THREE, camera, renderer, scene,creator,rotator,rotateAround,ScaleTran
 		
 			app.mixer = new THREE.AnimationMixer( app.mainCharacter );
 			
-			app.mixer.clipAction( app.mainCharacter.geometry.animations[ 1 ],0 ).play();
-			app.mixer.clipAction( app.mainCharacter.geometry.animations[ 3 ],0 ).play();
+			app.mixer.clipAction( app.mainCharacter.geometry.animations[0],0 ).play();
+			app.mixer.clipAction( app.mainCharacter.geometry.animations[1],0 ).play();
 			app.mixer._actions[0].weight = 0;
 			app.mixer._actions[1].weight = 1;
 			
